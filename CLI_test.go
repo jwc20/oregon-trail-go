@@ -16,5 +16,4 @@ func TestCLIInitSVT(t *testing.T) {
 	if !cli.State.Trip.FortAvailable {
 		t.Error("FortAvailable should be true")
 	}
-
 }

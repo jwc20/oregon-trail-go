@@ -29,3 +29,10 @@ func (cli *CLI) InitSVT() {
 	cli.State.Flags.SouthPassMileage = false
 	cli.State.Trip.TurnNumber = 0
 }
+
+// helper functions ***********************************
+
+func (cli *CLI) readLine() string {
+	cli.in.Scan()
+	return cli.in.Text()
+}
