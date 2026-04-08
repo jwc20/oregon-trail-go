@@ -52,5 +52,17 @@ func TestInitialPurchases(t *testing.T) {
 	assert.Equal(t, 50, cli.State.Inventory.Clothing, "Inventory Clothing should be 50")
 	assert.Equal(t, 50, cli.State.Inventory.Miscellaneous, "Inventory Miscellaneous should be 50")
 	assert.Equal(t, 250, cli.State.Player.Cash, "Player Cash should be 250")
+}
 
+func TestInitialPurchasesOverspending(t *testing.T) {
+	input := "300\n300\n300\n300\n300\n"
+	store := &trail.StubGameStore{}
+	out := &bytes.Buffer{}
+	cli := trail.NewCLI(store, strings.NewReader(input), out)
+	cli.InitSVT()
+
+	result := cli.PromptInitialPurchases()
+
+	assert.False(t, result, "expected PromptInitialPurchases to return false on overspend")
+	assert.NotContains(t, out.String(), "OVERSPENT", "expected output to contain OVERSPENT")
 }

@@ -60,76 +60,90 @@ func (cli *CLI) PromptShootingLevel() bool {
 }
 
 func (cli *CLI) PromptInitialPurchases() bool {
-	//cash := cli.State.Player.Cash
-	cli.printf("\nYOU HAVE $%d TO SPEND ON YOUR TRIP.\n", cli.State.Player.Cash)
+	startingCash := cli.State.Player.Cash
+	cli.printf("\nYOU HAVE $%d TO SPEND ON YOUR TRIP.\n", startingCash)
 
-	cli.OxenPurchase()
-	cli.FoodPurchase()
-	cli.AmmoPurchase()
-	cli.ClothingPurchase()
-	cli.MiscPurchase()
+	spent := 0
+	purchases := []func() (int, bool){
+		cli.OxenPurchase,
+		cli.FoodPurchase,
+		cli.AmmoPurchase,
+		cli.ClothingPurchase,
+		cli.MiscPurchase,
+	}
 
+	for _, purchase := range purchases {
+		amount, ok := purchase()
+		if !ok {
+			return false
+		}
+		spent += amount
+	}
+
+	remaining := startingCash - spent
+	if remaining < 0 {
+		cli.printf("YOU OVERSPENT ON YOUR INVENTORY\n")
+		return false
+	}
+
+	cli.State.Player.Cash = remaining
+	cli.printf("AFTER ALL YOUR PURCHASES, YOU NOW HAVE $%d LEFT.\n", remaining)
 	return true
 }
 
-func (cli *CLI) OxenPurchase() bool {
+func (cli *CLI) OxenPurchase() (int, bool) {
 	cli.printf("HOW MUCH DO YOU WANT TO SPEND ON YOUR OXEN TEAM? ")
 	oxen, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
 	if err != nil || oxen < 200 || oxen > 300 {
 		cli.printf("AMOUNT MUST BE BETWEEN $200 AND $300\n")
-		return false
+		return 0, false
 	}
 	cli.State.Inventory.Oxen = oxen
-	cli.State.Player.Cash -= oxen
-	return true
+	return oxen, true
 }
 
-func (cli *CLI) FoodPurchase() bool {
+func (cli *CLI) FoodPurchase() (int, bool) {
 	cli.printf("HOW MUCH DO YOU WANT TO SPEND ON FOOD? ")
 	food, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
 	if err != nil || food < 100 || food > 200 {
 		cli.printf("AMOUNT MUST BE BETWEEN $100 AND $200\n")
-		return false
+		return 0, false
 	}
 	cli.State.Inventory.Food = food
-	cli.State.Player.Cash -= food
-	return true
+	return food, true
 }
 
-func (cli *CLI) AmmoPurchase() bool {
+func (cli *CLI) AmmoPurchase() (int, bool) {
 	cli.printf("HOW MUCH DO YOU WANT TO SPEND ON AMMO? ")
 	ammo, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
 	if err != nil || ammo < 50 || ammo > 100 {
 		cli.printf("AMOUNT MUST BE BETWEEN $50 AND $100\n")
-		return false
+		return 0, false
 	}
 	cli.State.Inventory.Ammo = ammo
-	cli.State.Player.Cash -= ammo
-	return true
+	return ammo, true
 }
 
-func (cli *CLI) ClothingPurchase() bool {
+func (cli *CLI) ClothingPurchase() (int, bool) {
 	cli.printf("HOW MUCH DO YOU WANT TO SPEND ON CLOTHING? ")
 	clothing, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
 	if err != nil || clothing < 50 || clothing > 100 {
 		cli.printf("AMOUNT MUST BE BETWEEN $50 AND $100\n")
-		return false
+		return 0, false
 	}
 	cli.State.Inventory.Clothing = clothing
-	cli.State.Player.Cash -= clothing
-	return true
+	return clothing, true
 }
 
-func (cli *CLI) MiscPurchase() bool {
+func (cli *CLI) MiscPurchase() (int, bool) {
 	cli.printf("HOW MUCH DO YOU WANT TO SPEND ON MISCELLANEOUS ITEMS? ")
 	misc, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
 	if err != nil || misc < 50 || misc > 100 {
 		cli.printf("AMOUNT MUST BE BETWEEN $50 AND $100\n")
-		return false
+		return 0, false
 	}
 	cli.State.Inventory.Miscellaneous = misc
-	cli.State.Player.Cash -= misc
-	return true
+	return misc, true
 }
 
 // helper functions ***************************************************************************************************
