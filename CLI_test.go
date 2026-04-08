@@ -120,8 +120,35 @@ func TestGenerateEvent(t *testing.T) {
 		}
 	}
 
-	//if !changed {
-	//	t.Error("expected at least one event to change game state")
-	//}
-	assert.False(t, changed, "expected at least one event to change game state")
+	assert.True(t, changed, "expected at least one event to change game state")
+}
+
+func TestHandleAilment(t *testing.T) {
+	t.Run("dies when no supplies", func(t *testing.T) {
+		store := &trail.StubGameStore{}
+		out := &bytes.Buffer{}
+		cli := trail.NewCLI(store, strings.NewReader(""), out)
+		cli.InitSVT()
+		cli.State.Flags.Ill = true
+		cli.State.Inventory.Miscellaneous = 2
+
+		survived := cli.HandleAilment()
+
+		assert.False(t, survived, "expected HandleAilment to return false (death)")
+		assert.Contains(t, out.String(), "PNEUMONIA", "expected death message to mention PNEUMONIA")
+	})
+
+	t.Run("survives with enough supplies", func(t *testing.T) {
+		store := &trail.StubGameStore{}
+		out := &bytes.Buffer{}
+		cli := trail.NewCLI(store, strings.NewReader(""), out)
+		cli.InitSVT()
+		cli.State.Flags.Injured = true
+		cli.State.Inventory.Miscellaneous = 30
+
+		survived := cli.HandleAilment()
+
+		assert.True(t, survived, "expected HandleAilment to return true (survived)")
+		assert.False(t, cli.State.Flags.Injured, "expected Injured to be false")
+	})
 }

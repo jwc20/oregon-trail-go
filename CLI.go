@@ -275,6 +275,23 @@ func (cli *CLI) GenerateEvent() {
 	}
 }
 
+func (cli *CLI) HandleAilment() bool {
+	if cli.State.Inventory.Miscellaneous < 5 {
+		cli.printf("YOU DON'T HAVE ENOUGH SUPPLIES TO GET WELL.\n")
+		if cli.State.Flags.Ill {
+			cli.printf("YOU DIED OF PNEUMONIA.\n")
+		} else {
+			cli.printf("YOU DIED OF YOUR INJURIES.\n")
+		}
+		return false
+	}
+	cli.State.Inventory.Miscellaneous -= 5 + GetRandomInt(5)
+	cli.State.Flags.Ill = false
+	cli.State.Flags.Injured = false
+	cli.printf("YOU USED MEDICINE AND RESTED.\n")
+	return true
+}
+
 // helper functions ***************************************************************************************************
 
 func (cli *CLI) readLine() string {
