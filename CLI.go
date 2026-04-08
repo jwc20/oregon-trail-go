@@ -27,7 +27,7 @@ func (cli *CLI) InitSVT() {
 	cli.State.Flags.Ill = false
 	cli.State.Flags.ClearedSouthPass = false
 	cli.State.Flags.ClearedBlueMtns = false
-	cli.State.Trip.Mileage = 0
+	cli.State.Trip.Mileage = TotalRequiredMileage
 	cli.State.Flags.SouthPassMileage = false
 	cli.State.Trip.TurnNumber = 0
 }
