@@ -220,6 +220,61 @@ func (cli *CLI) DateName() string {
 	return fmt.Sprintf("%s, %s, 1847", weekday, date)
 }
 
+func (cli *CLI) GenerateEvent() {
+	r := GetRandomInt(100)
+
+	switch {
+	case r < 6:
+		cli.printf("WAGON BREAKS DOWN — LOSS OF TIME AND SUPPLIES.\n")
+		cli.State.Trip.Mileage -= 15 + GetRandomInt(10)
+		cli.State.Inventory.Miscellaneous -= 8 + GetRandomInt(5)
+	case r < 11:
+		cli.printf("OX INJURED — LOSS OF TIME.\n")
+		cli.State.Trip.Mileage -= 25
+		cli.State.Inventory.Oxen -= 20
+	case r < 15:
+		cli.printf("BAD LUCK — YOUR DAUGHTER BROKE HER ARM.\n")
+		cli.State.Flags.Injured = true
+		cli.State.Inventory.Miscellaneous -= 5 + GetRandomInt(4)
+	case r < 20:
+		cli.printf("WILD ANIMALS ATTACK!\n")
+		cli.State.Inventory.Ammo -= 10 + GetRandomInt(5)
+		if cli.State.Inventory.Ammo < 0 {
+			cli.printf("YOU RAN OUT OF BULLETS — THEY GOT SOME OF YOUR FOOD.\n")
+			cli.State.Inventory.Food -= 30 + GetRandomInt(20)
+		}
+	case r < 25:
+		cli.printf("COLD WEATHER — BRRRR!\n")
+		if cli.State.Inventory.Clothing < 20 {
+			cli.printf("YOU DON'T HAVE ENOUGH CLOTHING TO KEEP WARM.\n")
+			cli.State.Flags.Ill = true
+		}
+	case r < 30:
+		cli.printf("HEAVY RAINS — TIME LOST AND SUPPLIES DAMAGED.\n")
+		cli.State.Trip.Mileage -= 10 + GetRandomInt(5)
+		cli.State.Inventory.Food -= 10
+		cli.State.Inventory.Ammo -= 5 + GetRandomInt(5)
+		cli.State.Inventory.Miscellaneous -= 5 + GetRandomInt(5)
+	case r < 33:
+		cli.printf("BANDITS ATTACK!\n")
+		cli.State.Inventory.Food -= 10 + GetRandomInt(10)
+		cli.State.Player.Cash -= 10 + GetRandomInt(15)
+		if cli.State.Player.Cash < 0 {
+			cli.State.Player.Cash = 0
+		}
+	case r < 36:
+		cli.printf("FIRE IN YOUR WAGON — LOSS OF SUPPLIES.\n")
+		cli.State.Inventory.Food -= 40 + GetRandomInt(30)
+		cli.State.Inventory.Ammo -= 20 + GetRandomInt(20)
+		cli.State.Inventory.Miscellaneous -= 10 + GetRandomInt(10)
+	case r < 40:
+		cli.printf("HELPFUL INDIANS SHOW YOU WHERE TO FIND FOOD.\n")
+		cli.State.Inventory.Food += 14 + GetRandomInt(5)
+	default:
+		// nothing happens
+	}
+}
+
 // helper functions ***************************************************************************************************
 
 func (cli *CLI) readLine() string {
