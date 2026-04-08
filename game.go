@@ -17,18 +17,25 @@ type Inventory struct {
 }
 
 type TripState struct {
-	Mileage       int
-	TurnNumber    int
-	FortAvailable bool
+	Mileage         int
+	PreviousMileage int
+	TurnNumber      int
+	CurrentDate     int
+	EatingChoice    int
+	ActionChoice    int
+	FortAvailable   bool
+	FortSpending    int
 }
 
 type Flags struct {
-	Injured          bool
-	Ill              bool
-	ClearedSouthPass bool
-	ClearedBlueMtns  bool
-	SouthPassMileage bool
+	Injured              bool
+	Ill                  bool
+	ClearedSouthPass     bool
+	ClearedBlueMountains bool
+	SouthPassMileage     bool
 }
+
+// ********************************************************************************************************************
 
 type GameState struct {
 	Player    Player

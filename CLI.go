@@ -29,7 +29,7 @@ func (cli *CLI) InitSVT() {
 	cli.State.Flags.Injured = false
 	cli.State.Flags.Ill = false
 	cli.State.Flags.ClearedSouthPass = false
-	cli.State.Flags.ClearedBlueMtns = false
+	cli.State.Flags.ClearedBlueMountains = false
 	cli.State.Trip.Mileage = TotalRequiredMileage
 	cli.State.Flags.SouthPassMileage = false
 	cli.State.Trip.TurnNumber = 0
@@ -144,6 +144,18 @@ func (cli *CLI) MiscPurchase() (int, bool) {
 	}
 	cli.State.Inventory.Miscellaneous = misc
 	return misc, true
+}
+
+func (cli *CLI) PromptEating() {
+	cli.printf("DO YOU WANT TO EAT (1) POORLY (2) MODERATELY (3) WELL? ")
+	choice, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+	if err != nil || choice < 1 || choice > 3 {
+		choice = 2
+	}
+	cli.State.Trip.EatingChoice = choice
+
+	foodUsed := 8 + 5*choice // TODO: check later if this is correct
+	cli.State.Inventory.Food -= foodUsed
 }
 
 // helper functions ***************************************************************************************************

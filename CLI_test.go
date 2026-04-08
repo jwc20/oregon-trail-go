@@ -18,7 +18,7 @@ func TestCLIInitSVT(t *testing.T) {
 
 	assert.True(t, cli.State.Trip.FortAvailable, "FortAvailable should be true")
 	assert.False(t, cli.State.Flags.Injured, "Injured should be false")
-	assert.False(t, cli.State.Flags.ClearedBlueMtns, "ClearedBlueMtns should be false")
+	assert.False(t, cli.State.Flags.ClearedBlueMountains, "ClearedBlueMountains should be false")
 	assert.Equal(t, 2040, cli.State.Trip.Mileage, "Mileage should be 2040")
 	assert.False(t, cli.State.Flags.SouthPassMileage, "SouthPassMileage should be false")
 	assert.Equal(t, 0, cli.State.Trip.TurnNumber, "TurnNumber should be 0")
@@ -65,4 +65,17 @@ func TestInitialPurchasesOverspending(t *testing.T) {
 
 	assert.False(t, result, "expected PromptInitialPurchases to return false on overspend")
 	assert.NotContains(t, out.String(), "OVERSPENT", "expected output to contain OVERSPENT")
+}
+
+func TestEating(t *testing.T) {
+	store := &trail.StubGameStore{}
+	out := &bytes.Buffer{}
+	cli := trail.NewCLI(store, strings.NewReader("2\n"), out)
+	cli.InitSVT()
+	cli.State.Inventory.Food = 100
+
+	cli.PromptEating()
+
+	assert.Equal(t, 2, cli.State.Trip.EatingChoice, "expected EatingChoice to be 2")
+	assert.Equal(t, 80, cli.State.Inventory.Food, "expected Inventory Food to be 80")
 }
