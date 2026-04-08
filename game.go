@@ -1,6 +1,7 @@
 package oregontrail
 
 const TotalRequiredMileage = 2040
+const InitialCash = 700
 
 type Player struct {
 	Cash          int
