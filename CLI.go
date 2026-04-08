@@ -6,13 +6,15 @@ import (
 )
 
 type CLI struct {
+	store GameStore
 	State GameState
 	in    *bufio.Scanner
 	out   io.Writer
 }
 
-func NewCLI(in io.Reader, out io.Writer) *CLI {
+func NewCLI(store GameStore, in io.Reader, out io.Writer) *CLI {
 	return &CLI{
+		store: store,
 		State: GameState{},
 		in:    bufio.NewScanner(in),
 		out:   out,

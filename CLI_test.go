@@ -9,8 +9,9 @@ import (
 )
 
 func TestCLIInitSVT(t *testing.T) {
+	store := &trail.StubGameStore{}
 	out := &bytes.Buffer{}
-	cli := trail.NewCLI(strings.NewReader(""), out)
+	cli := trail.NewCLI(store, strings.NewReader(""), out)
 	cli.InitSVT()
 
 	if !cli.State.Trip.FortAvailable {
