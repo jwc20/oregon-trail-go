@@ -35,3 +35,14 @@ type GameState struct {
 	Trip      TripState
 	Flags     Flags
 }
+
+func InitSVT(state *GameState) {
+	state.Trip.FortAvailable = true
+	state.Flags.Injured = false
+	state.Flags.Ill = false
+	state.Flags.ClearedSouthPass = false
+	state.Flags.ClearedBlueMtns = false
+	state.Trip.Mileage = 0
+	state.Flags.SouthPassMileage = false
+	state.Trip.TurnNumber = 0
+}
