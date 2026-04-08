@@ -6,13 +6,33 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/joho/godotenv"
 )
+
+func checkIfTestMode() bool {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	testMode := os.Getenv("TEST_MODE")
+
+	return testMode == "true"
+}
 
 func GetRandomInt(ceiling int) int {
 	// returns a integer in the closed interval [1, ceiling]
+
+	if checkIfTestMode() {
+		// stop program from requesting random.org if it is in test mode
+		result := rand.Intn(ceiling) + 1
+		return result
+	}
 
 	RandomIntURL := fmt.Sprintf("https://www.random.org/integers/?num=1&min=1&max=%d&col=1&base=10&format=plain&rnd=new", ceiling)
 
@@ -20,7 +40,7 @@ func GetRandomInt(ceiling int) int {
 	response, err := NewGetRandomIntResponseFromClient(request)
 	if err != nil {
 		// backup
-		result := rand.Intn(10)
+		result := rand.Intn(ceiling)
 		return result
 	}
 	defer response.Body.Close()
