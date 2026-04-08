@@ -30,13 +30,13 @@ func (cli *CLI) InitSVT() {
 	cli.State.Flags.Ill = false
 	cli.State.Flags.ClearedSouthPass = false
 	cli.State.Flags.ClearedBlueMountains = false
-	cli.State.Trip.Mileage = TotalRequiredMileage
+	cli.State.Trip.Mileage = 0
 	cli.State.Flags.SouthPassMileage = false
 	cli.State.Trip.TurnNumber = 0
 	cli.State.Player.Cash = InitialCash
 }
 
-// Game Prompts *******************************************************************************************************
+// shooting prompt ****************************************************************************************************
 
 func (cli *CLI) PromptShootingLevel() bool {
 	cli.printf("HOW GOOD A SHOT ARE YOU WITH YOUR RIFLE?\n")
@@ -58,6 +58,8 @@ func (cli *CLI) PromptShootingLevel() bool {
 	cli.State.Player.ShootingLevel = level
 	return true
 }
+
+// initial purchase logic *********************************************************************************************
 
 func (cli *CLI) PromptInitialPurchases() bool {
 	startingCash := cli.State.Player.Cash
@@ -92,59 +94,71 @@ func (cli *CLI) PromptInitialPurchases() bool {
 }
 
 func (cli *CLI) OxenPurchase() (int, bool) {
-	cli.printf("HOW MUCH DO YOU WANT TO SPEND ON YOUR OXEN TEAM? ")
-	oxen, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
-	if err != nil || oxen < 200 || oxen > 300 {
-		cli.printf("AMOUNT MUST BE BETWEEN $200 AND $300\n")
-		return 0, false
+	for {
+		cli.printf("HOW MUCH DO YOU WANT TO SPEND ON YOUR OXEN TEAM? ")
+		oxen, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+		if err != nil || oxen < 200 || oxen > 300 {
+			cli.printf("AMOUNT MUST BE BETWEEN $200 AND $300\n")
+			continue
+		}
+		cli.State.Inventory.Oxen = oxen
+		return oxen, true
 	}
-	cli.State.Inventory.Oxen = oxen
-	return oxen, true
 }
 
 func (cli *CLI) FoodPurchase() (int, bool) {
-	cli.printf("HOW MUCH DO YOU WANT TO SPEND ON FOOD? ")
-	food, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
-	if err != nil || food < 100 || food > 200 {
-		cli.printf("AMOUNT MUST BE BETWEEN $100 AND $200\n")
-		return 0, false
+	for {
+		cli.printf("HOW MUCH DO YOU WANT TO SPEND ON FOOD? ")
+		food, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+		if err != nil || food < 100 || food > 200 {
+			cli.printf("AMOUNT MUST BE BETWEEN $100 AND $200\n")
+			continue
+		}
+		cli.State.Inventory.Food = food
+		return food, true
 	}
-	cli.State.Inventory.Food = food
-	return food, true
 }
 
 func (cli *CLI) AmmoPurchase() (int, bool) {
-	cli.printf("HOW MUCH DO YOU WANT TO SPEND ON AMMO? ")
-	ammo, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
-	if err != nil || ammo < 50 || ammo > 100 {
-		cli.printf("AMOUNT MUST BE BETWEEN $50 AND $100\n")
-		return 0, false
+	for {
+		cli.printf("HOW MUCH DO YOU WANT TO SPEND ON AMMO? ")
+		ammo, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+		if err != nil || ammo < 50 || ammo > 100 {
+			cli.printf("AMOUNT MUST BE BETWEEN $50 AND $100\n")
+			continue
+		}
+		cli.State.Inventory.Ammo = ammo
+		return ammo, true
 	}
-	cli.State.Inventory.Ammo = ammo
-	return ammo, true
 }
 
 func (cli *CLI) ClothingPurchase() (int, bool) {
-	cli.printf("HOW MUCH DO YOU WANT TO SPEND ON CLOTHING? ")
-	clothing, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
-	if err != nil || clothing < 50 || clothing > 100 {
-		cli.printf("AMOUNT MUST BE BETWEEN $50 AND $100\n")
-		return 0, false
+	for {
+		cli.printf("HOW MUCH DO YOU WANT TO SPEND ON CLOTHING? ")
+		clothing, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+		if err != nil || clothing < 50 || clothing > 100 {
+			cli.printf("AMOUNT MUST BE BETWEEN $50 AND $100\n")
+			continue
+		}
+		cli.State.Inventory.Clothing = clothing
+		return clothing, true
 	}
-	cli.State.Inventory.Clothing = clothing
-	return clothing, true
 }
 
 func (cli *CLI) MiscPurchase() (int, bool) {
-	cli.printf("HOW MUCH DO YOU WANT TO SPEND ON MISCELLANEOUS ITEMS? ")
-	misc, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
-	if err != nil || misc < 50 || misc > 100 {
-		cli.printf("AMOUNT MUST BE BETWEEN $50 AND $100\n")
-		return 0, false
+	for {
+		cli.printf("HOW MUCH DO YOU WANT TO SPEND ON MISCELLANEOUS ITEMS? ")
+		misc, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+		if err != nil || misc < 50 || misc > 100 {
+			cli.printf("AMOUNT MUST BE BETWEEN $50 AND $100\n")
+			continue
+		}
+		cli.State.Inventory.Miscellaneous = misc
+		return misc, true
 	}
-	cli.State.Inventory.Miscellaneous = misc
-	return misc, true
 }
+
+// eating logic *********************************************************************************************************
 
 func (cli *CLI) PromptEating() {
 	cli.printf("DO YOU WANT TO EAT (1) POORLY (2) MODERATELY (3) WELL? ")
@@ -292,6 +306,86 @@ func (cli *CLI) HandleAilment() bool {
 	return true
 }
 
+func (cli *CLI) GameLoop() {
+	for cli.State.Trip.Mileage < TotalRequiredMileage {
+		cli.State.Trip.TurnNumber++
+		cli.State.Trip.CurrentDate = cli.State.Trip.TurnNumber
+
+		cli.printf("\n---------------------------------------------\n")
+		cli.printf("TURN %d — %s\n", cli.State.Trip.TurnNumber, cli.DateName())
+		cli.printf("TOTAL MILEAGE: %d\n", cli.State.Trip.Mileage)
+		cli.printf("FOOD: %d  AMMO: %d  CLOTHING: %d  MISC: %d\n",
+			cli.State.Inventory.Food, cli.State.Inventory.Ammo,
+			cli.State.Inventory.Clothing, cli.State.Inventory.Miscellaneous)
+		cli.printf("CASH: $%d\n", cli.State.Player.Cash)
+		cli.printf("---------------------------------------------\n")
+
+		if cli.State.Inventory.Food < 0 {
+			cli.printf("YOU RAN OUT OF FOOD AND STARVED TO DEATH.\n")
+			cli.PrintFinalMessage()
+			return
+		}
+
+		if !cli.PromptTurnAction() {
+			return
+		}
+
+		cli.PromptEating()
+		cli.AdvanceMileage()
+		cli.GenerateEvent()
+
+		if cli.State.Flags.Injured || cli.State.Flags.Ill {
+			if !cli.HandleAilment() {
+				cli.PrintFinalMessage()
+				return
+			}
+		}
+	}
+
+	cli.printf("\n*** CONGRATULATIONS! YOU MADE IT TO OREGON CITY! ***\n")
+	cli.PrintFinalMessage()
+}
+
+func (cli *CLI) PlaySVT() {
+	cli.printf("DO YOU NEED INSTRUCTIONS (YES/NO)? ")
+	answer := cli.readLine()
+	if strings.ToUpper(answer) == "YES" {
+		cli.printIntro()
+	}
+
+	cli.InitSVT()
+
+	if !cli.PromptShootingLevel() {
+		return
+	}
+
+	if !cli.PromptInitialPurchases() {
+		return
+	}
+
+	cli.GameLoop()
+}
+
+func (cli *CLI) printIntro() {
+	cli.printf("\n")
+	cli.printf("THIS PROGRAM SIMULATES A TRIP OVER THE OREGON TRAIL FROM\n")
+	cli.printf("INDEPENDENCE, MISSOURI TO OREGON CITY, OREGON IN 1847.\n")
+	cli.printf("YOUR FAMILY OF FIVE WILL COVER THE 2040 MILE OREGON TRAIL\n")
+	cli.printf("IN 5-6 MONTHS --- IF YOU MAKE IT ALIVE.\n")
+	cli.printf("\n")
+	cli.printf("YOU HAD SAVED $900 TO SPEND FOR THE TRIP, AND YOU'VE JUST\n") // TODO: this is hard coded
+	cli.printf("PAID $200 FOR A WAGON.\n")
+	cli.printf("YOU WILL NEED TO SPEND THE REST OF YOUR MONEY ON THE\n")
+	cli.printf("FOLLOWING ITEMS:\n")
+	cli.printf("\n")
+	cli.printf("  OXEN - YOU CAN SPEND $200-$300 ON YOUR TEAM.\n")
+	cli.printf("  FOOD - THE MORE YOU HAVE, THE LESS CHANCE OF GETTING SICK.\n")
+	cli.printf("  AMMUNITION - $1 BUYS A GENEROUS SUPPLY OF BULLETS.\n")
+	cli.printf("  CLOTHING - IMPORTANT FOR COLD WEATHER IN THE MOUNTAINS.\n")
+	cli.printf("  MISCELLANEOUS SUPPLIES - MEDICINE AND REPAIR ITEMS.\n")
+	cli.printf("\n")
+}
+
 // helper functions ***************************************************************************************************
 
 func (cli *CLI) readLine() string {
@@ -301,4 +395,21 @@ func (cli *CLI) readLine() string {
 
 func (cli *CLI) printf(format string, a ...interface{}) {
 	fmt.Fprintf(cli.out, format, a...)
+}
+
+func (cli *CLI) PromptTurnAction() bool {
+	cli.printf("DO YOU WANT TO (1) CONTINUE ON TRAIL (2) HUNT? ")
+	choice, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+	if err != nil {
+		choice = 1
+	}
+	cli.State.Trip.ActionChoice = choice
+	return true
+}
+
+func (cli *CLI) PrintFinalMessage() {
+	cli.printf("\n--- FINAL STATS ---\n")
+	cli.printf("TOTAL MILEAGE: %d / %d\n", cli.State.Trip.Mileage, TotalRequiredMileage)
+	cli.printf("TURNS TAKEN: %d\n", cli.State.Trip.TurnNumber)
+	cli.printf("CASH REMAINING: $%d\n", cli.State.Player.Cash)
 }

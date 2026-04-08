@@ -2,6 +2,7 @@ package oregontrail_test
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -19,7 +20,7 @@ func TestCLIInitSVT(t *testing.T) {
 	assert.True(t, cli.State.Trip.FortAvailable, "FortAvailable should be true")
 	assert.False(t, cli.State.Flags.Injured, "Injured should be false")
 	assert.False(t, cli.State.Flags.ClearedBlueMountains, "ClearedBlueMountains should be false")
-	assert.Equal(t, 2040, cli.State.Trip.Mileage, "Mileage should be 2040")
+	assert.Equal(t, 0, cli.State.Trip.Mileage, "Mileage should be 0")
 	assert.False(t, cli.State.Flags.SouthPassMileage, "SouthPassMileage should be false")
 	assert.Equal(t, 0, cli.State.Trip.TurnNumber, "TurnNumber should be 0")
 }
@@ -151,4 +152,54 @@ func TestHandleAilment(t *testing.T) {
 		assert.True(t, survived, "expected HandleAilment to return true (survived)")
 		assert.False(t, cli.State.Flags.Injured, "expected Injured to be false")
 	})
+}
+
+func TestGameLoop(t *testing.T) {
+	// each turn needs: action choice + eating choice
+	turns := strings.Repeat("1\n2\n", 15)
+	store := &trail.StubGameStore{}
+	out := &bytes.Buffer{}
+	cli := trail.NewCLI(store, strings.NewReader(turns), out)
+	cli.InitSVT()
+	cli.State.Inventory.Oxen = 250
+	cli.State.Inventory.Food = 500
+	cli.State.Inventory.Ammo = 100
+	cli.State.Inventory.Clothing = 50
+	cli.State.Inventory.Miscellaneous = 50
+	cli.State.Player.Cash = 100
+
+	fmt.Println(cli.State.Trip.TurnNumber, cli.State.Trip.Mileage)
+	cli.GameLoop()
+	fmt.Println(cli.State.Trip.TurnNumber, cli.State.Trip.Mileage)
+
+	if cli.State.Trip.Mileage <= 0 {
+		t.Errorf("Mileage should have increased, got %d", cli.State.Trip.Mileage)
+	}
+	if cli.State.Trip.TurnNumber <= 0 {
+		t.Errorf("TurnNumber should have increased, got %d", cli.State.Trip.TurnNumber)
+	}
+}
+
+func TestFullGame(t *testing.T) {
+	// Instructions: NO
+	// Shooting: 1
+	// Purchases: Oxen 300, Food 200, Ammo 50, Clothing 50, Misc 50
+	// Each turn: action 1 (continue) + eating 1 (poorly, to conserve food)
+	setup := "NO\n1\n300\n200\n50\n50\n50\n"
+	turns := strings.Repeat("1\n1\n", 20) // enough turns to finish
+	input := setup + turns
+
+	store := &trail.StubGameStore{}
+	out := &bytes.Buffer{}
+	cli := trail.NewCLI(store, strings.NewReader(input), out)
+
+	cli.PlaySVT()
+
+	output := out.String()
+	// The game should either reach Oregon or the player died
+	if !strings.Contains(output, "CONGRATULATIONS") &&
+		!strings.Contains(output, "DIED") &&
+		!strings.Contains(output, "STARVED") {
+		t.Error("expected game to reach an ending")
+	}
 }
