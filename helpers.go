@@ -12,6 +12,8 @@ import (
 )
 
 func GetRandomInt(ceiling int) int {
+	// returns a integer in the closed interval [1, ceiling]
+
 	RandomIntURL := fmt.Sprintf("https://www.random.org/integers/?num=1&min=1&max=%d&col=1&base=10&format=plain&rnd=new", ceiling)
 
 	request := NewGetRandomIntRequest(RandomIntURL)
