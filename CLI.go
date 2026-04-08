@@ -172,6 +172,54 @@ func (cli *CLI) AdvanceMileage() {
 	cli.State.Trip.Mileage += miles
 }
 
+func (cli *CLI) DateName() string {
+	// Date logic is based on original Oregon Trail game
+	dates := []string{
+		"MARCH 29",
+		"APRIL 12",
+		"APRIL 26",
+		"MAY 10",
+		"MAY 24",
+		"JUNE 7",
+		"JUNE 21",
+		"JULY 5",
+		"JULY 19",
+		"AUGUST 2",
+		"AUGUST 16",
+		"AUGUST 31",
+		"SEPTEMBER 13",
+		"SEPTEMBER 27",
+		"OCTOBER 11",
+		"OCTOBER 25",
+		"NOVEMBER 8",
+		"NOVEMBER 22",
+		"DECEMBER 6",
+		"DECEMBER 20",
+	}
+
+	weekdays := []string{
+		"SATURDAY",
+		"SUNDAY",
+		"MONDAY",
+		"TUESDAY",
+		"WEDNESDAY",
+		"THURSDAY",
+		"FRIDAY",
+	}
+
+	turn := cli.State.Trip.TurnNumber
+
+	if turn > len(dates) {
+		return "WINTER"
+	}
+
+	idx := turn - 1
+	date := dates[idx]
+	weekday := weekdays[idx%len(weekdays)]
+
+	return fmt.Sprintf("%s, %s, 1847", weekday, date)
+}
+
 // helper functions ***************************************************************************************************
 
 func (cli *CLI) readLine() string {
