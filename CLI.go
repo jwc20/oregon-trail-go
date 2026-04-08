@@ -158,6 +158,20 @@ func (cli *CLI) PromptEating() {
 	cli.State.Inventory.Food -= foodUsed
 }
 
+// trip logic *********************************************************************************************************
+//1. continue
+//2. hunt
+
+func (cli *CLI) AdvanceMileage() {
+	cli.State.Trip.PreviousMileage = cli.State.Trip.Mileage
+	randomInt := GetRandomInt()
+	miles := int(200 + (cli.State.Inventory.Oxen-220)/5 + randomInt*10)
+	if cli.State.Trip.ActionChoice != 1 {
+		miles /= 2
+	}
+	cli.State.Trip.Mileage += miles
+}
+
 // helper functions ***************************************************************************************************
 
 func (cli *CLI) readLine() string {

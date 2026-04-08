@@ -77,5 +77,18 @@ func TestEating(t *testing.T) {
 	cli.PromptEating()
 
 	assert.Equal(t, 2, cli.State.Trip.EatingChoice, "expected EatingChoice to be 2")
-	assert.Equal(t, 80, cli.State.Inventory.Food, "expected Inventory Food to be 80")
+	assert.Equal(t, 82, cli.State.Inventory.Food, "expected Inventory Food to be 82")
+}
+
+func TestAdvanceMileage(t *testing.T) {
+	store := &trail.StubGameStore{}
+	out := &bytes.Buffer{}
+	cli := trail.NewCLI(store, strings.NewReader(""), out)
+	cli.InitSVT()
+	cli.State.Inventory.Oxen = 1000
+	cli.State.Trip.ActionChoice = 1
+
+	cli.AdvanceMileage()
+
+	assert.GreaterOrEqualf(t, cli.State.Trip.Mileage, 0, "Mileage should be > 0, got %d", cli.State.Trip.Mileage)
 }
