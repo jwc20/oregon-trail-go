@@ -23,3 +23,34 @@ func TestCLIInitSVT(t *testing.T) {
 	assert.False(t, cli.State.Flags.SouthPassMileage, "SouthPassMileage should be false")
 	assert.Equal(t, 0, cli.State.Trip.TurnNumber, "TurnNumber should be 0")
 }
+
+func TestShootingLevel(t *testing.T) {
+	store := &trail.StubGameStore{}
+	out := &bytes.Buffer{}
+	cli := trail.NewCLI(store, strings.NewReader("3\n"), out)
+	cli.InitSVT()
+
+	result := cli.PromptShootingLevel()
+
+	assert.True(t, result, "Expected PromptShootingLevel to return true")
+	assert.Equal(t, 3, cli.State.Player.ShootingLevel, "ShootingLevel")
+}
+
+func TestInitialPurchases(t *testing.T) {
+	input := "200\n100\n50\n50\n50\n"
+	store := &trail.StubGameStore{}
+	out := &bytes.Buffer{}
+	cli := trail.NewCLI(store, strings.NewReader(input), out)
+	cli.InitSVT()
+
+	result := cli.PromptInitialPurchases()
+
+	assert.True(t, result, "Expected PromptInitialPurchases to return true")
+	assert.Equal(t, 200, cli.State.Inventory.Oxen, "Inventory Oxen should be 200")
+	assert.Equal(t, 100, cli.State.Inventory.Food, "Inventory Food should be 100")
+	assert.Equal(t, 50, cli.State.Inventory.Ammo, "Inventory Ammo should be 50")
+	assert.Equal(t, 50, cli.State.Inventory.Clothing, "Inventory Clothing should be 50")
+	assert.Equal(t, 50, cli.State.Inventory.Miscellaneous, "Inventory Miscellaneous should be 50")
+	assert.Equal(t, 250, cli.State.Player.Cash, "Player Cash should be 250")
+
+}
