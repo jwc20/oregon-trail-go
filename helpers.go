@@ -1,6 +1,7 @@
 package oregontrail
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -10,10 +11,10 @@ import (
 	"time"
 )
 
-const RandomIntURL = "https://www.random.org/integers/?num=1&min=1&max=10&col=1&base=10&format=plain&rnd=new"
+func GetRandomInt(ceiling int) int {
+	RandomIntURL := fmt.Sprintf("https://www.random.org/integers/?num=1&min=1&max=%d&col=1&base=10&format=plain&rnd=new", ceiling)
 
-func GetRandomInt() int {
-	request := NewGetRandomIntRequest()
+	request := NewGetRandomIntRequest(RandomIntURL)
 	response, err := NewGetRandomIntResponseFromClient(request)
 	if err != nil {
 		// backup
@@ -26,8 +27,8 @@ func GetRandomInt() int {
 	return result
 }
 
-func NewGetRandomIntRequest() *http.Request {
-	req, err := http.NewRequest("GET", RandomIntURL, nil)
+func NewGetRandomIntRequest(url string) *http.Request {
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

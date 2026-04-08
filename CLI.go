@@ -164,7 +164,7 @@ func (cli *CLI) PromptEating() {
 
 func (cli *CLI) AdvanceMileage() {
 	cli.State.Trip.PreviousMileage = cli.State.Trip.Mileage
-	randomInt := GetRandomInt()
+	randomInt := GetRandomInt(10)
 	miles := int(200 + (cli.State.Inventory.Oxen-220)/5 + randomInt*10)
 	if cli.State.Trip.ActionChoice != 1 {
 		miles /= 2
