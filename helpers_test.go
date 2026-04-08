@@ -53,7 +53,7 @@ func TestNewGetRandomIntResponseFromClient(t *testing.T) {
 		req, err := http.NewRequest("GET", server.URL, nil)
 		require.NoError(t, err)
 
-		resp := trail.NewGetRandomIntResponseFromClient(req)
+		resp, _ := trail.NewGetRandomIntResponseFromClient(req)
 		defer resp.Body.Close()
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
@@ -68,7 +68,7 @@ func TestNewGetRandomIntResponseFromClient(t *testing.T) {
 		req, err := http.NewRequest("GET", server.URL, nil)
 		require.NoError(t, err)
 
-		resp := trail.NewGetRandomIntResponseFromClient(req)
+		resp, _ := trail.NewGetRandomIntResponseFromClient(req)
 		defer resp.Body.Close()
 
 		body, _ := io.ReadAll(resp.Body)

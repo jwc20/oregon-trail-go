@@ -3,6 +3,7 @@ package oregontrail
 import (
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,7 +14,12 @@ const RandomIntURL = "https://www.random.org/integers/?num=1&min=1&max=10&col=1&
 
 func GetRandomInt() int {
 	request := NewGetRandomIntRequest()
-	response := NewGetRandomIntResponseFromClient(request)
+	response, err := NewGetRandomIntResponseFromClient(request)
+	if err != nil {
+		// backup
+		result := rand.Intn(10)
+		return result
+	}
 	defer response.Body.Close()
 
 	result := ExtractRandomInteger(response)
@@ -28,7 +34,7 @@ func NewGetRandomIntRequest() *http.Request {
 	return req
 }
 
-func NewGetRandomIntResponseFromClient(req *http.Request) *http.Response {
+func NewGetRandomIntResponseFromClient(req *http.Request) (*http.Response, error) {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
@@ -36,7 +42,7 @@ func NewGetRandomIntResponseFromClient(req *http.Request) *http.Response {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return resp
+	return resp, err
 }
 
 func ExtractRandomInteger(resp *http.Response) int {
