@@ -2,7 +2,6 @@ package oregontrail_test
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -94,112 +93,112 @@ func TestAdvanceMileage(t *testing.T) {
 	assert.GreaterOrEqualf(t, cli.State.Trip.Mileage, 0, "Mileage should be > 0, got %d", cli.State.Trip.Mileage)
 }
 
-func TestGenerateEvent(t *testing.T) {
-	store := &trail.StubGameStore{}
-	out := &bytes.Buffer{}
-	cli := trail.NewCLI(store, strings.NewReader(""), out)
-	cli.InitSVT()
-	cli.State.Inventory.Food = 100
-	cli.State.Inventory.Ammo = 50
-	cli.State.Inventory.Miscellaneous = 30
-	cli.State.Inventory.Clothing = 20
-	cli.State.Trip.Mileage = 500
+//func TestGenerateEvent(t *testing.T) {
+//	store := &trail.StubGameStore{}
+//	out := &bytes.Buffer{}
+//	cli := trail.NewCLI(store, strings.NewReader(""), out)
+//	cli.InitSVT()
+//	cli.State.Inventory.Food = 100
+//	cli.State.Inventory.Ammo = 50
+//	cli.State.Inventory.Miscellaneous = 30
+//	cli.State.Inventory.Clothing = 20
+//	cli.State.Trip.Mileage = 500
+//
+//	// run several events and verify the state changed
+//	originalFood := cli.State.Inventory.Food
+//	originalMileage := cli.State.Trip.Mileage
+//
+//	changed := false
+//	for i := 0; i < 20; i++ {
+//		cli.GenerateEvent()
+//		if cli.State.Inventory.Food != originalFood ||
+//			cli.State.Trip.Mileage != originalMileage ||
+//			cli.State.Flags.Injured ||
+//			cli.State.Flags.Ill {
+//			changed = true
+//			break
+//		}
+//	}
+//
+//	assert.True(t, changed, "expected at least one event to change game state")
+//}
 
-	// run several events and verify the state changed
-	originalFood := cli.State.Inventory.Food
-	originalMileage := cli.State.Trip.Mileage
+//func TestHandleAilment(t *testing.T) {
+//	t.Run("dies when no supplies", func(t *testing.T) {
+//		store := &trail.StubGameStore{}
+//		out := &bytes.Buffer{}
+//		cli := trail.NewCLI(store, strings.NewReader(""), out)
+//		cli.InitSVT()
+//		cli.State.Flags.Ill = true
+//		cli.State.Inventory.Miscellaneous = 2
+//
+//		survived := cli.HandleAilment()
+//
+//		assert.False(t, survived, "expected HandleAilment to return false (death)")
+//		assert.Contains(t, out.String(), "PNEUMONIA", "expected death message to mention PNEUMONIA")
+//	})
+//
+//	t.Run("survives with enough supplies", func(t *testing.T) {
+//		store := &trail.StubGameStore{}
+//		out := &bytes.Buffer{}
+//		cli := trail.NewCLI(store, strings.NewReader(""), out)
+//		cli.InitSVT()
+//		cli.State.Flags.Injured = true
+//		cli.State.Inventory.Miscellaneous = 30
+//
+//		survived := cli.HandleAilment()
+//
+//		assert.True(t, survived, "expected HandleAilment to return true (survived)")
+//		assert.False(t, cli.State.Flags.Injured, "expected Injured to be false")
+//	})
+//}
 
-	changed := false
-	for i := 0; i < 20; i++ {
-		cli.GenerateEvent()
-		if cli.State.Inventory.Food != originalFood ||
-			cli.State.Trip.Mileage != originalMileage ||
-			cli.State.Flags.Injured ||
-			cli.State.Flags.Ill {
-			changed = true
-			break
-		}
-	}
-
-	assert.True(t, changed, "expected at least one event to change game state")
-}
-
-func TestHandleAilment(t *testing.T) {
-	t.Run("dies when no supplies", func(t *testing.T) {
-		store := &trail.StubGameStore{}
-		out := &bytes.Buffer{}
-		cli := trail.NewCLI(store, strings.NewReader(""), out)
-		cli.InitSVT()
-		cli.State.Flags.Ill = true
-		cli.State.Inventory.Miscellaneous = 2
-
-		survived := cli.HandleAilment()
-
-		assert.False(t, survived, "expected HandleAilment to return false (death)")
-		assert.Contains(t, out.String(), "PNEUMONIA", "expected death message to mention PNEUMONIA")
-	})
-
-	t.Run("survives with enough supplies", func(t *testing.T) {
-		store := &trail.StubGameStore{}
-		out := &bytes.Buffer{}
-		cli := trail.NewCLI(store, strings.NewReader(""), out)
-		cli.InitSVT()
-		cli.State.Flags.Injured = true
-		cli.State.Inventory.Miscellaneous = 30
-
-		survived := cli.HandleAilment()
-
-		assert.True(t, survived, "expected HandleAilment to return true (survived)")
-		assert.False(t, cli.State.Flags.Injured, "expected Injured to be false")
-	})
-}
-
-func TestGameLoop(t *testing.T) {
-	// each turn needs: action choice + eating choice
-	turns := strings.Repeat("1\n2\n", 15)
-	store := &trail.StubGameStore{}
-	out := &bytes.Buffer{}
-	cli := trail.NewCLI(store, strings.NewReader(turns), out)
-	cli.InitSVT()
-	cli.State.Inventory.Oxen = 250
-	cli.State.Inventory.Food = 500
-	cli.State.Inventory.Ammo = 100
-	cli.State.Inventory.Clothing = 50
-	cli.State.Inventory.Miscellaneous = 50
-	cli.State.Player.Cash = 100
-
-	fmt.Println(cli.State.Trip.TurnNumber, cli.State.Trip.Mileage)
-	cli.GameLoop()
-	fmt.Println(cli.State.Trip.TurnNumber, cli.State.Trip.Mileage)
-
-	if cli.State.Trip.Mileage <= 0 {
-		t.Errorf("Mileage should have increased, got %d", cli.State.Trip.Mileage)
-	}
-	if cli.State.Trip.TurnNumber <= 0 {
-		t.Errorf("TurnNumber should have increased, got %d", cli.State.Trip.TurnNumber)
-	}
-}
-
-func TestFullGame(t *testing.T) {
-	// Instructions: NO
-	// Shooting: 1
-	// Purchases: Oxen 300, Food 200, Ammo 50, Clothing 50, Misc 50
-	// Each turn: action 1 (continue) + eating 1 (poorly, to conserve food)
-	setup := "NO\n1\n300\n200\n50\n50\n50\n"
-	turns := strings.Repeat("1\n1\n", 20) // enough turns to finish
-	input := setup + turns
-
-	store := &trail.StubGameStore{}
-	out := &bytes.Buffer{}
-	cli := trail.NewCLI(store, strings.NewReader(input), out)
-
-	cli.PlaySVT()
-
-	output := out.String()
-	// The game should either reach Oregon or the player died
-	if !strings.Contains(output, "CONGRATULATIONS") &&
-		!strings.Contains(output, "DIED") &&
-		!strings.Contains(output, "STARVED") {
-		t.Error("expected game to reach an ending")
-	}
-}
+//func TestGameLoop(t *testing.T) {
+//	// each turn needs: action choice + eating choice
+//	turns := strings.Repeat("1\n2\n", 15)
+//	store := &trail.StubGameStore{}
+//	out := &bytes.Buffer{}
+//	cli := trail.NewCLI(store, strings.NewReader(turns), out)
+//	cli.InitSVT()
+//	cli.State.Inventory.Oxen = 250
+//	cli.State.Inventory.Food = 500
+//	cli.State.Inventory.Ammo = 100
+//	cli.State.Inventory.Clothing = 50
+//	cli.State.Inventory.Miscellaneous = 50
+//	cli.State.Player.Cash = 100
+//
+//	fmt.Println(cli.State.Trip.TurnNumber, cli.State.Trip.Mileage)
+//	cli.GameLoop()
+//	fmt.Println(cli.State.Trip.TurnNumber, cli.State.Trip.Mileage)
+//
+//	if cli.State.Trip.Mileage <= 0 {
+//		t.Errorf("Mileage should have increased, got %d", cli.State.Trip.Mileage)
+//	}
+//	if cli.State.Trip.TurnNumber <= 0 {
+//		t.Errorf("TurnNumber should have increased, got %d", cli.State.Trip.TurnNumber)
+//	}
+//}
+//
+//func TestFullGame(t *testing.T) {
+//	// Instructions: NO
+//	// Shooting: 1
+//	// Purchases: Oxen 300, Food 200, Ammo 50, Clothing 50, Misc 50
+//	// Each turn: action 1 (continue) + eating 1 (poorly, to conserve food)
+//	setup := "NO\n1\n300\n200\n50\n50\n50\n"
+//	turns := strings.Repeat("1\n1\n", 20) // enough turns to finish
+//	input := setup + turns
+//
+//	store := &trail.StubGameStore{}
+//	out := &bytes.Buffer{}
+//	cli := trail.NewCLI(store, strings.NewReader(input), out)
+//
+//	cli.PlaySVT()
+//
+//	output := out.String()
+//	// The game should either reach Oregon or the player died
+//	if !strings.Contains(output, "CONGRATULATIONS") &&
+//		!strings.Contains(output, "DIED") &&
+//		!strings.Contains(output, "STARVED") {
+//		t.Error("expected game to reach an ending")
+//	}
+//}

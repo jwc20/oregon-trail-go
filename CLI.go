@@ -47,7 +47,11 @@ func (cli *CLI) PromptShootingLevel() bool {
 	cli.printf("  (5) SHAKY KNEES\n")
 	cli.printf("ENTER ONE OF THE ABOVE: ")
 
-	level, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+	line, ok := cli.readLine()
+	if !ok {
+		return false
+	}
+	level, err := strconv.Atoi(strings.TrimSpace(line))
 	//fmt.Printf("\n")
 	//fmt.Fprint(cli.out, level)
 
@@ -96,7 +100,13 @@ func (cli *CLI) PromptInitialPurchases() bool {
 func (cli *CLI) OxenPurchase() (int, bool) {
 	for {
 		cli.printf("HOW MUCH DO YOU WANT TO SPEND ON YOUR OXEN TEAM? ")
-		oxen, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+
+		line, ok := cli.readLine()
+		if !ok {
+			return 0, false
+		}
+		oxen, err := strconv.Atoi(strings.TrimSpace(line))
+
 		if err != nil || oxen < 200 || oxen > 300 {
 			cli.printf("AMOUNT MUST BE BETWEEN $200 AND $300\n")
 			continue
@@ -109,7 +119,13 @@ func (cli *CLI) OxenPurchase() (int, bool) {
 func (cli *CLI) FoodPurchase() (int, bool) {
 	for {
 		cli.printf("HOW MUCH DO YOU WANT TO SPEND ON FOOD? ")
-		food, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+
+		line, ok := cli.readLine()
+		if !ok {
+			return 0, false
+		}
+		food, err := strconv.Atoi(strings.TrimSpace(line))
+
 		if err != nil || food < 100 || food > 200 {
 			cli.printf("AMOUNT MUST BE BETWEEN $100 AND $200\n")
 			continue
@@ -122,7 +138,13 @@ func (cli *CLI) FoodPurchase() (int, bool) {
 func (cli *CLI) AmmoPurchase() (int, bool) {
 	for {
 		cli.printf("HOW MUCH DO YOU WANT TO SPEND ON AMMO? ")
-		ammo, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+
+		line, ok := cli.readLine()
+		if !ok {
+			return 0, false
+		}
+		ammo, err := strconv.Atoi(strings.TrimSpace(line))
+
 		if err != nil || ammo < 50 || ammo > 100 {
 			cli.printf("AMOUNT MUST BE BETWEEN $50 AND $100\n")
 			continue
@@ -135,7 +157,13 @@ func (cli *CLI) AmmoPurchase() (int, bool) {
 func (cli *CLI) ClothingPurchase() (int, bool) {
 	for {
 		cli.printf("HOW MUCH DO YOU WANT TO SPEND ON CLOTHING? ")
-		clothing, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+
+		line, ok := cli.readLine()
+		if !ok {
+			return 0, false
+		}
+		clothing, err := strconv.Atoi(strings.TrimSpace(line))
+
 		if err != nil || clothing < 50 || clothing > 100 {
 			cli.printf("AMOUNT MUST BE BETWEEN $50 AND $100\n")
 			continue
@@ -148,7 +176,13 @@ func (cli *CLI) ClothingPurchase() (int, bool) {
 func (cli *CLI) MiscPurchase() (int, bool) {
 	for {
 		cli.printf("HOW MUCH DO YOU WANT TO SPEND ON MISCELLANEOUS ITEMS? ")
-		misc, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+
+		line, ok := cli.readLine()
+		if !ok {
+			return 0, false
+		}
+		misc, err := strconv.Atoi(strings.TrimSpace(line))
+
 		if err != nil || misc < 50 || misc > 100 {
 			cli.printf("AMOUNT MUST BE BETWEEN $50 AND $100\n")
 			continue
@@ -162,7 +196,10 @@ func (cli *CLI) MiscPurchase() (int, bool) {
 
 func (cli *CLI) PromptEating() {
 	cli.printf("DO YOU WANT TO EAT (1) POORLY (2) MODERATELY (3) WELL? ")
-	choice, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+
+	line, _ := cli.readLine()
+	choice, err := strconv.Atoi(strings.TrimSpace(line))
+
 	if err != nil || choice < 1 || choice > 3 {
 		choice = 2
 	}
@@ -348,7 +385,7 @@ func (cli *CLI) GameLoop() {
 
 func (cli *CLI) PlaySVT() {
 	cli.printf("DO YOU NEED INSTRUCTIONS (YES/NO)? ")
-	answer := cli.readLine()
+	answer, _ := cli.readLine()
 	if strings.ToUpper(answer) == "YES" {
 		cli.printIntro()
 	}
@@ -388,9 +425,16 @@ func (cli *CLI) printIntro() {
 
 // helper functions ***************************************************************************************************
 
-func (cli *CLI) readLine() string {
-	cli.in.Scan()
-	return cli.in.Text()
+//func (cli *CLI) readLine() string {
+//	cli.in.Scan()
+//	return cli.in.Text()
+//}
+
+func (cli *CLI) readLine() (string, bool) {
+	if !cli.in.Scan() {
+		return "", false
+	}
+	return cli.in.Text(), true
 }
 
 func (cli *CLI) printf(format string, a ...interface{}) {
@@ -399,7 +443,13 @@ func (cli *CLI) printf(format string, a ...interface{}) {
 
 func (cli *CLI) PromptTurnAction() bool {
 	cli.printf("DO YOU WANT TO (1) CONTINUE ON TRAIL (2) HUNT? ")
-	choice, err := strconv.Atoi(strings.TrimSpace(cli.readLine()))
+
+	line, ok := cli.readLine()
+	if !ok {
+		return false
+	}
+	choice, err := strconv.Atoi(strings.TrimSpace(line))
+
 	if err != nil {
 		choice = 1
 	}
