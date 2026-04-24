@@ -1,1 +1,1 @@
-# oregon-trail-go
+# otg
